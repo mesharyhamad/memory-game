@@ -27,7 +27,9 @@ function shuffle(array) {
 
 
 const classCards = ['fa-diamond', 'fa-paper-plane-o', 'fa-anchor', 'fa-bolt', 'fa-cube', 'fa-leaf', 'fa-bicycle', 'fa-bomb', 'fa-diamond', 'fa-paper-plane-o', 'fa-anchor', 'fa-bolt', 'fa-cube', 'fa-leaf', 'fa-bicycle', 'fa-bomb'];
-let time= new timer()
+let time = new timer();
+let stars = new decreaseStrars();
+
 //this function to create card html
 function createHTMLCard() {
     let classCardNew = shuffle(classCards);
@@ -60,7 +62,7 @@ function addEvent() {
     //console.log(document.querySelectorAll(".fa-star"));
     let listOpenCards = new Array();
     let numberOfmoves = 0;
-    let trueCard=2;
+    let trueCard = 0;
     for (let card of cards) {
         card.addEventListener('click', function () {
 
@@ -74,6 +76,9 @@ function addEvent() {
                             if (listOpenCards[0].childNodes[1].className == listOpenCards[1].childNodes[1].className) {
                                 list.classList.add("match");
                                 trueCard++;
+                                if (trueCard == 16) {
+                                    winner();
+                                }
                             } else {
                                 list.classList.add("incorrect");
                                 setTimeout(function () {
@@ -94,31 +99,65 @@ function addEvent() {
                 numberOfmoves++;
 
             }
-            console.log(trueCard);
-            if(trueCard>16){
-                winner();
-            }
-
             document.querySelector('.moves').textContent = numberOfmoves;
+
+
         });
     }
 
 
 }
 
-function winner() {
-   $('.container').hide()
+//here every 20 sec will be decrease strars
+function decreaseStrars() {
+
+    let timeInterval;
+    this.openTime = function () {
+        timeInterval = setInterval(function () {
+            $(".fa-star").last().removeClass("fa-star").addClass("fa-star-o");
+        }, 20000);
+    }
+    this.closeTime = function () {
+        clearInterval(timeInterval);
+
+    }
 }
+
+function winner() {
+    let moves, stars, timer;
+    moves = document.querySelector('.moves').textContent;
+    stars = document.querySelectorAll('.fa-star').length;
+    timer = document.querySelector('.timer').textContent;
+    let winnerHTML = `<div class="winner">
+    <p> with ${moves} moves , ${stars} Starts and ${timer} seconds</p><br>
+    <p>Woooooo!</p> <br>
+    <div class="play-again"><p style="color: black">play again!</p></div> 
+    </div> `;
+    $('.container').hide();
+    $("body").append(winnerHTML);
+    $('.play-again').bind('click', function () {
+        $('.winner').hide();
+        $('.container').show();
+        gameAgain();
+    });
+
+}
+
+function gameAgain() {
+    createHTMLCard(classCards);
+    addEvent();
+    document.querySelector('.moves').textContent = 0;
+    document.querySelector('.timer').textContent = 0;
+    $(".fa-star-o").removeClass("fa-star-o").addClass("fa-star");
+    time.closeTime();
+    time = new timer();
+    time.openTime();
+}
+
 //this function to restart Game
 function restartGame() {
     document.querySelector('.restart').addEventListener('click', function () {
-        createHTMLCard(classCards);
-        addEvent();
-        document.querySelector('.moves').textContent = 0;
-        document.querySelector('.timer').textContent = 0;
-        time.closeTime();
-        time = new timer();
-        time.openTime();
+        gameAgain();
     });
 }
 
@@ -132,7 +171,7 @@ function timer() {
             timer++;
         }, 1000);
     }
-    this.closeTime =function () {
+    this.closeTime = function () {
         clearInterval(timeInterval);
 
     }
@@ -146,7 +185,6 @@ createHTMLCard(classCards);
 addEvent();
 //this function to restart Game
 restartGame();
-
 time.openTime();
-
+stars.openTime();
 
